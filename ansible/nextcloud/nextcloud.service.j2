@@ -1,0 +1,14 @@
+[Unit]
+Description=Nextcloud container service
+Requires=docker.service
+After=docker.service
+
+[Service]
+Restart=always
+WorkingDirectory={{ nextcloud_path }}
+
+ExecStart=/usr/bin/docker compose --env-file .env up
+ExecStop=/usr/bin/docker compose down
+
+[Install]
+WantedBy=multi-user.target

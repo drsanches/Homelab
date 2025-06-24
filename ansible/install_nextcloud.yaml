@@ -1,0 +1,48 @@
+---
+- name: Install Nextcloud
+  hosts: all
+  vars:
+    nextcloud_path: /opt/nextcloud
+
+  tasks:
+
+  - name: Check for Nextcloud service
+    ansible.builtin.systemd:
+      name: nextcloud
+    ignore_errors: true
+    register: service_status
+
+  - name: Stop play if Nextcloud is installed
+    meta: end_play
+    when: service_status.status.LoadState == "loaded"
+
+  # Installation
+
+  - name: Create directory
+    ansible.builtin.file:
+      path: "{{ nextcloud_path }}"
+      state: directory
+    become: true
+
+  - name: Copy docker compose configs
+    ansible.builtin.template:
+      src: "{{ item }}"
+      dest: "{{ nextcloud_path }}/{{ item | basename | regex_replace('\\.j2$', '') }}"
+    with_fileglob:
+      - ./nextcloud/docker-compose.yml.j2
+      - ./nextcloud/.env.j2
+    become: true
+
+  - name: Copy systemd service config
+    ansible.builtin.template:
+      src: ./nextcloud/nextcloud.service.j2
+      dest: /etc/systemd/system/nextcloud.service
+    become: true
+
+  - name: Enable Nextcloud
+    ansible.builtin.systemd_service:
+      name: nextcloud
+      state: started
+      enabled: true
+      daemon_reload: true
+    become: true
