@@ -40,8 +40,8 @@
 │       │   │   └── nextcloud.conf      # [Nginx] Nginx config for nextcloud
 │       │   └── nginx.conf              # [Nginx] Main nginx config (includes config.d)
 │       ├── ssl/
-│       │   ├── domain.key              # [Nginx] Private key
-│       │   └── domain.crt              # [Nginx] Certificate
+│       │   ├── server.key              # [Nginx] Private key
+│       │   └── server.crt              # [Nginx] Certificate
 │       └── docker-compose.yml          # [Nginx] Nginx docker compose
 │
 ├── {{ nginx_logs }}/
@@ -64,6 +64,28 @@
 
 # Commands
 
+### Create certificates
+
+Run in `certs` directory with correct ip:
+```shell
+./generate.sh 172.24.6.204
+```
+
+Reuslts:
+```
+rootCA.crt - Root certificate (to install)
+rootCA.key - Private root key (to sign server certsificates)
+rootCA.srl - The number of the last server certificate (to sign the next certificate)
+
+server.crt - Server certificate
+server.key - Server private key
+
+Auxiliary files: server.csr, san.cnf
+```
+
+### Run ansible
+
+Run in `ansible` directory:
 ```shell
 ansible-playbook \
     -i inventory_example.yml \

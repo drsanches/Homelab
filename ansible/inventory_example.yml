@@ -11,6 +11,8 @@ all:
       nextcloud_protocol: https
       nextcloud_host: 172.24.6.204
       nextcloud_port: 9436
+      nginx_cert_path: ../certs/server.crt
+      nginx_cert_key_path: ../certs/server.key
       nginx_cockpit_external_port: 9435
       nginx_nextcloud_external_port: 9436
       nginx_logs: /mnt/md127/nginx/logs

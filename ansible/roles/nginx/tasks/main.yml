@@ -1,23 +1,18 @@
-# Generate self-signed certs (TODO)
+- name: Create directory for certs
+  ansible.builtin.file:
+    path: "{{ ssl_cert_path }}"
+    state: directory
+  become: true
 
-# - name: Create directory for certs
-#   ansible.builtin.file:
-#     path: "{{ ssl_cert_path }}"
-#     state: directory
-#   become: true
-
-# - name: Generate private key and self-signed certificate
-#   ansible.builtin.command: >
-#     openssl req -x509 -nodes -newkey rsa:2048
-#     -keyout {{ ssl_cert_path }}/{{ domain }}.key
-#     -out {{ ssl_cert_path }}/{{ domain }}.crt
-#     -days 365
-#     -subj "/CN={{ domain }}"
-#   args:
-#     creates: "{{ ssl_cert_path }}/{{ domain }}.crt"
-#   become: true
-
-# Installing Nginx
+- name: Copy certs
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - { src: "{{ nginx_cert_path }}", dest: "{{ ssl_cert_path }}/{{ cert_name }}.crt" }
+    - { src: "{{ nginx_cert_key_path }}", dest: "{{ ssl_cert_path }}/{{ cert_name }}.key" }
+  notify: Enable and restart Nginx
+  become: true
 
 - name: Create directories for configs
   ansible.builtin.file:
