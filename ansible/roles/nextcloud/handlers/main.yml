@@ -1,0 +1,7 @@
+- name: Enable and restart Nextcloud
+  ansible.builtin.systemd_service:
+    name: nextcloud
+    state: restarted
+    enabled: true
+    daemon_reload: true
+  become: true

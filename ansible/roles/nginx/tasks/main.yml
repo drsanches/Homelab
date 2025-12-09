@@ -1,0 +1,62 @@
+# Generate self-signed certs (TODO)
+
+# - name: Create directory for certs
+#   ansible.builtin.file:
+#     path: "{{ ssl_cert_path }}"
+#     state: directory
+#   become: true
+
+# - name: Generate private key and self-signed certificate
+#   ansible.builtin.command: >
+#     openssl req -x509 -nodes -newkey rsa:2048
+#     -keyout {{ ssl_cert_path }}/{{ domain }}.key
+#     -out {{ ssl_cert_path }}/{{ domain }}.crt
+#     -days 365
+#     -subj "/CN={{ domain }}"
+#   args:
+#     creates: "{{ ssl_cert_path }}/{{ domain }}.crt"
+#   become: true
+
+# Installing Nginx
+
+- name: Create directories for configs
+  ansible.builtin.file:
+    path: "{{ nginx_path }}/config/conf.d"
+    state: directory
+  become: true
+
+- name: Create directories for logs
+  ansible.builtin.file:
+    path: "{{ nginx_logs }}/{{ item }}"
+    state: directory
+  loop:
+      - cockpit
+      - nextcloud
+  become: true
+
+- name: Copy Nginx configs
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - { src: docker-compose.yml.j2, dest: "{{ nginx_path }}/docker-compose.yml" }
+    - { src: nginx.service.j2, dest: /etc/systemd/system/nginx.service }
+  notify: Enable and restart Nginx
+  become: true
+
+- name: Copy main Nginx config
+  ansible.builtin.copy:
+    src: nginx.conf
+    dest: "{{ nginx_path }}/config/nginx.conf"
+  notify: Enable and restart Nginx
+  become: true
+
+- name: Copy Nginx configs for services
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "{{ nginx_path }}/config/conf.d/{{ item | basename | regex_replace('\\.j2$', '') }}"
+  loop:
+    - conf.d/cockpit.conf.j2
+    - conf.d/nextcloud.conf.j2
+  notify: Enable and restart Nginx
+  become: true

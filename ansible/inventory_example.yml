@@ -1,0 +1,16 @@
+all:
+  hosts:
+    #TODO
+    server_example:
+      ansible_host: 172.24.6.204
+      ansible_port: 123
+      ssh_config_new_port: 123
+      nextcloud_data_directory: /mnt/md127/nextcloud
+      nextcloud_db_root_password: pswd
+      nextcloud_db_password: pswd
+      nextcloud_protocol: https
+      nextcloud_host: 172.24.6.204
+      nextcloud_port: 9436
+      nginx_cockpit_external_port: 9435
+      nginx_nextcloud_external_port: 9436
+      nginx_logs: /mnt/md127/nginx/logs

@@ -1,0 +1,4 @@
+nginx_path: /opt/nginx
+ssl_cert_path: /opt/nginx/ssl
+domain: domain
+cockpit_internal_port: 9090 # Default, but can be configured

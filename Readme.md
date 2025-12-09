@@ -12,7 +12,7 @@
 1. `sudo apt install net-tools`
 2. `sudo apt install openssh-server -y`
 3. `sudo apt install python3`
-4. `sudo apt install python3-pip`
+4. `sudo apt install python3-pip -y`
 
 ## Folder structure
 
@@ -60,63 +60,14 @@
 
 ![Network diagram](./doc/network_diagram.drawio.png)
 
+#### TODO: Close cockpit_internal_port
+
 # Commands
 
 ```shell
 ansible-playbook \
--i 172.30.137.122, -e ansible_port=122 \
--u user --ask-pass --ask-become-pass \
---extra-vars "new_port=123" \
-set_ssh_port.yaml
+    -i inventory_example.yml \
+    -u user --ask-pass --ask-become-pass \
+    server.yml
 ```
 
-```shell
-ansible-playbook \
--i 172.30.137.122, -e ansible_port=123 \
--u user --ask-pass --ask-become-pass \
-apt_update_and_upgrade.yaml
-```
-
-```shell
-ansible-playbook \
--i 172.30.137.122, -e ansible_port=123 \
--u user --ask-pass --ask-become-pass \
-install_cockpit.yaml
-```
-
-```shell
-ansible-playbook \
--i 172.30.137.122, -e ansible_port=123 \
--u user --ask-pass --ask-become-pass \
-install_docker.yaml
-```
-
-```shell
-ansible-playbook \
--i 172.30.137.122, -e ansible_port=123 \
--u user --ask-pass --ask-become-pass \
---extra-vars "nextcloud_data_directory=/mnt/md127/nextcloud \
-              db_root_password=pswd \
-              db_password=pswd" \
-install_nextcloud.yaml
-```
-
-```shell
-ansible-playbook \
--i 172.30.137.122, -e ansible_port=123 \
--u user --ask-pass --ask-become-pass \
---extra-vars "cockpit_external_port=9435 \
-              nextcloud_external_port=9436 \
-              nginx_logs=/mnt/md127/nginx/logs" \
-install_nginx.yaml
-```
-
-```shell
-ansible-playbook \
--i 172.30.137.122, -e ansible_port=123 \
--u user --ask-pass --ask-become-pass \
---extra-vars "nextcloud_data_directory=/mnt/md127/nextcloud \
-              protocol=https \
-              host=172.30.137.122:9436" \
-configure_nextcloud.yaml
-```

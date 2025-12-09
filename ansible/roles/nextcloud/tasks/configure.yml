@@ -1,0 +1,46 @@
+#TODO: Wait for Nextcloud to be installed?
+
+- name: Check if Nextcloud config file exists
+  stat:
+    path: "{{nextcloud_data_directory}}/app_data/config/config.php"
+  register: file_info
+
+- name: Set Nextcloud config trusted_domains
+  ansible.builtin.replace:
+    path: "{{nextcloud_data_directory}}/app_data/config/config.php"
+    regexp: "    0 => '.*',"
+    replace: "    0 => '{{nextcloud_host}}',"
+  notify: Enable and restart Nextcloud
+  become: true
+  when: file_info.stat.exists
+
+- name: Set Nextcloud config overwrite.cli.url
+  ansible.builtin.replace:
+    path: "{{nextcloud_data_directory}}/app_data/config/config.php"
+    regexp: ".*overwrite.cli.url.*"
+    replace: "  'overwrite.cli.url' => '{{nextcloud_protocol}}://{{nextcloud_host}}:{{nextcloud_port}}',"
+  notify: Enable and restart Nextcloud
+  become: true
+  when: file_info.stat.exists
+
+- name: Set Nextcloud config overwritehost
+  ansible.builtin.lineinfile:
+    path: "{{nextcloud_data_directory}}/app_data/config/config.php"
+    regexp: ".*overwritehost.*"
+    line: "  'overwritehost' => '{{nextcloud_host}}:{{nextcloud_port}}',"
+    insertafter: ".*overwrite.cli.url.*"
+    create: true
+  notify: Enable and restart Nextcloud
+  become: true
+  when: file_info.stat.exists
+
+- name: Set Nextcloud config overwriteprotocol
+  ansible.builtin.lineinfile:
+    path: "{{nextcloud_data_directory}}/app_data/config/config.php"
+    regexp: ".*overwriteprotocol.*"
+    line: "  'overwriteprotocol' => '{{nextcloud_protocol}}',"
+    insertafter: ".*overwrite.cli.url.*"
+    create: true
+  notify: Enable and restart Nextcloud
+  become: true
+  when: file_info.stat.exists

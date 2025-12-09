@@ -1,0 +1,48 @@
+#TODO: Refactor
+
+# Docker check
+
+- name: Check for docker binary
+  ansible.builtin.command: which docker
+  changed_when: false
+  failed_when: false
+  register: docker_check
+
+- name: Ensure Docker is enabled and started
+  ansible.builtin.systemd_service:
+    name: docker
+    state: started
+    enabled: yes
+  become: true
+  when: docker_check.rc == 0
+
+# Installation
+
+- name: Generate UUID
+  command: python3 -c "import uuid; print(uuid.uuid4())"
+  register: generated_uuid
+  when: docker_check.rc != 0
+
+- name: Create a temporary directory
+  ansible.builtin.file:
+    path: /tmp/{{generated_uuid.stdout}}
+    state: directory
+  when: docker_check.rc != 0
+
+- name: Download docker installation script
+  ansible.builtin.get_url:
+    url: https://get.docker.com
+    dest: /tmp/{{generated_uuid.stdout}}/get-docker.sh
+    mode: '777'
+  when: docker_check.rc != 0
+
+- name: Run installation script
+  ansible.builtin.shell: /tmp/{{generated_uuid.stdout}}/get-docker.sh
+  become: true
+  when: docker_check.rc != 0
+
+- name: Remove installation script with directory
+  ansible.builtin.file:
+    path: /tmp/{{generated_uuid.stdout}}
+    state: absent
+  when: docker_check.rc != 0

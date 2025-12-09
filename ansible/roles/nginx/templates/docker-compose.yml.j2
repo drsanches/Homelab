@@ -13,8 +13,8 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
-      - "{{ cockpit_external_port }}:{{ cockpit_external_port }}"
-      - "{{ nextcloud_external_port }}:{{ nextcloud_external_port }}"
+      - "{{ nginx_cockpit_external_port }}:{{ nginx_cockpit_external_port }}"
+      - "{{ nginx_nextcloud_external_port }}:{{ nginx_nextcloud_external_port }}"
     networks:
       - nextcloud_external_network
 

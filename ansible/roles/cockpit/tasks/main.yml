@@ -1,0 +1,33 @@
+- name: Ensure that Cockpit is installed
+  ansible.builtin.package:
+    name: cockpit
+    state: present
+  become: true
+
+- name: Ensure that the config directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/system/cockpit.socket.d
+    state: directory
+  become: true
+
+- name: Configure port
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/cockpit.socket.d/listen.conf
+    #TODO: Move to templates
+    content: |
+      [Socket]
+      ListenStream=
+      ListenStream={{ cockpit_port }}
+  notify: Restart Cockpit
+  become: true
+
+- name: Configure redirect for Nginx proxy
+  ansible.builtin.copy:
+    dest: /etc/cockpit/cockpit.conf
+    #TODO: Move to templatess
+    content: |
+      [WebService]
+      Origins = https://host.docker.internal:{{ cockpit_port }} wss://host.docker.internal:{{ cockpit_port }}
+      ProtocolHeader = X-Forwarded-Proto
+  notify: Restart Cockpit
+  become: true

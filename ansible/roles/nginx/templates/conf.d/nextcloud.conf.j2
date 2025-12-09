@@ -1,5 +1,5 @@
 server {
-    listen {{ nextcloud_external_port }} ssl;
+    listen {{ nginx_nextcloud_external_port }} ssl;
     
     ssl_certificate /etc/nginx/ssl/{{ domain }}.crt;
     ssl_certificate_key /etc/nginx/ssl/{{ domain }}.key;
