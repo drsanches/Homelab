@@ -2,7 +2,7 @@
 
   roles:
     - ssh_config
-    - cockpit
     - docker
+    - cockpit
     - nextcloud
     - nginx
