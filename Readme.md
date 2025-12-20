@@ -60,7 +60,9 @@
 
 ![Network diagram](./doc/network_diagram.drawio.png)
 
-#### TODO: Close cockpit_internal_port
+#### TODO: 
+- Close cockpit_internal_port
+- Use special users and chmod
 
 # Commands
 

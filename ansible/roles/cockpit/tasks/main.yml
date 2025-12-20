@@ -10,24 +10,12 @@
     state: directory
   become: true
 
-- name: Configure port
-  ansible.builtin.copy:
-    dest: /etc/systemd/system/cockpit.socket.d/listen.conf
-    #TODO: Move to templates
-    content: |
-      [Socket]
-      ListenStream=
-      ListenStream={{ cockpit_port }}
-  notify: Restart Cockpit
-  become: true
-
-- name: Configure redirect for Nginx proxy
-  ansible.builtin.copy:
-    dest: /etc/cockpit/cockpit.conf
-    #TODO: Move to templatess
-    content: |
-      [WebService]
-      Origins = https://host.docker.internal:{{ cockpit_port }} wss://host.docker.internal:{{ cockpit_port }}
-      ProtocolHeader = X-Forwarded-Proto
+- name: Configure Cockpit
+  ansible.builtin.template:
+      src: "{{ item.src }}"
+      dest: "{{ item.dest }}"
+  loop:
+    - { src: cockpit.conf.j2, dest: /etc/cockpit/cockpit.conf }
+    - { src: listen.conf.j2, dest: /etc/systemd/system/cockpit.socket.d/listen.conf }
   notify: Restart Cockpit
   become: true
