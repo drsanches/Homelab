@@ -1,9 +1,3 @@
-version: '2' #TODO
-
-volumes:
-  nextcloud:
-  db:
-
 services:
   db:
     image: mariadb:10.5
@@ -17,6 +11,9 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:?}
       - MYSQL_DATABASE=${MYSQL_DATABASE:?}
       - MYSQL_USER=${MYSQL_USER:?}
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "127.0.0.1", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}", "--silent"]
+      start_period: 5s
     networks:
       - default
 
@@ -24,8 +21,6 @@ services:
     image: nextcloud:22.0.0-apache
     container_name: nextcloud
     restart: always
-    links:
-      - db
     volumes:
       - {{ nextcloud_data_directory }}/app_data:/var/www/html
     environment:
@@ -33,6 +28,12 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE:?}
       - MYSQL_USER=${MYSQL_USER:?}
       - MYSQL_HOST=db
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1/status.php"]
+      start_period: 5s
     networks:
       - default
       - external_network
