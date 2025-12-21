@@ -69,7 +69,12 @@
 
 Run in `certs` directory with correct ip:
 ```shell
-./generate.sh 172.24.6.204
+./generate_certs.sh 172.24.6.204
+```
+
+Or with custom parameters (`ip`, `cert-days`, `root-cert-days`, `root-cn`):
+```shell
+./generate_certs.sh 172.24.6.204 365 3650 serverCA
 ```
 
 Reuslts:

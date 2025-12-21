@@ -6,10 +6,9 @@ if [ $# -lt 1 ]; then
 fi
 
 IP="$1"
-#TODO: Get from params?
-DAYS=365
-ROOT_DAYS=3650
-ROOT_CN="serverCA"
+DAYS="${2:-365}"
+ROOT_DAYS="${3:-3650}"
+ROOT_CN="${4:-serverCA}"
 
 # ========================
 # Step 1: Create CA
