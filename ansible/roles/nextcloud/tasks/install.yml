@@ -1,16 +1,58 @@
+- name: Create Nextcloud user
+  ansible.builtin.user:
+    name: "{{ nextcloud_user }}"
+    groups: docker
+    comment: "Nextcloud service user"
+    shell: /usr/sbin/nologin
+    system: yes
+    create_home: yes #TODO: Do not create?
+    home: "{{ nextcloud_path }}"
+  become: true
+
 - name: Ensure Nextcloud directory exists
   ansible.builtin.file:
     path: "{{ nextcloud_path }}"
     state: directory
+    owner: "{{ nextcloud_user }}"
+    group: "{{ nextcloud_user }}"
+    mode: '0750'
+  become: true
+  
+- name: Ensure Nextcloud data directory exists
+  ansible.builtin.file:
+    path: "{{ nextcloud_path }}/data"
+    state: directory
+  become: true
+
+- name: Mount data directory
+  ansible.builtin.mount: #TODO: Use ansible.posix.mount
+    path: "{{ nextcloud_path }}/data"
+    src: "{{ nextcloud_data_directory }}"
+    fstype: none
+    opts: bind
+    state: mounted
+  notify: Enable and restart Nextcloud
   become: true
 
 - name: Copy Nextcloud configs
   ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
+    owner: "{{ nextcloud_user }}"
+    group: "{{ nextcloud_user }}"
+    mode: '0750'
   loop:
     - { src: docker-compose.yml.j2, dest: "{{ nextcloud_path }}/docker-compose.yml" }
     - { src: .env.j2, dest: "{{ nextcloud_path }}/.env" }
-    - { src: nextcloud.service.j2, dest: /etc/systemd/system/nextcloud.service }
+  notify: Enable and restart Nextcloud
+  become: true
+
+- name: Copy Nextcloud systemd config
+  ansible.builtin.template:
+    src: nextcloud.service.j2
+    dest: /etc/systemd/system/nextcloud.service
+    owner: root
+    group: root
+    mode: '0640'
   notify: Enable and restart Nextcloud
   become: true

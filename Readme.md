@@ -28,10 +28,11 @@
 │           ├── nginx.service           # [Nginx] Nginx service
 │           └── nextcloud.service       # [Nextcloud] Nextcloud service
 │
-├── opt/
+├── srv/
 │   ├── nextcloud/
-│   │   ├── docker-copmose.yml          # [Nextcloud] Nextcloud docker compose 
-│   │   └── .env                        # [Nextcloud] Environment for docker compose 
+│   │   ├── docker-copmose.yml          # [Nextcloud] Nextcloud docker compose
+│   │   ├── .env                        # [Nextcloud] Environment for docker compose
+│   │   └── data/                       # [Nextcloud] Mounted {{ nextcloud_data_directory }}
 │   │
 │   └── nginx/
 │       ├── config/
@@ -42,6 +43,7 @@
 │       ├── ssl/
 │       │   ├── server.key              # [Nginx] Private key
 │       │   └── server.crt              # [Nginx] Certificate
+│       ├── logs/                       # [Nginx] Mounted {{ nginx_logs }}
 │       └── docker-compose.yml          # [Nginx] Nginx docker compose
 │
 ├── {{ nginx_logs }}/
@@ -59,9 +61,6 @@
 ## Network diagram
 
 ![Network diagram](./doc/network_diagram.drawio.png)
-
-#### TODO:
-- Use special users and chmod
 
 # Commands
 

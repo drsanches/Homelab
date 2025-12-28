@@ -1,38 +1,72 @@
-- name: Create directory for certs
+- name: Create Nginx user
+  ansible.builtin.user:
+    name: "{{ nginx_user }}"
+    groups: docker
+    comment: "Nginx service user"
+    shell: /usr/sbin/nologin
+    system: yes
+    create_home: yes #TODO: Do not create?
+    home: "{{ nginx_path }}"
+  become: true
+
+- name: Create directories for Nginx
   ansible.builtin.file:
-    path: "{{ ssl_cert_path }}"
+    path: "{{ item }}"
     state: directory
+    owner: "{{ nginx_user }}"
+    group: "{{ nginx_user }}"
+    mode: '0750'
+  loop:
+    - "{{ nginx_path }}/config/conf.d"
+    - "{{ nginx_path }}/ssl"
   become: true
 
 - name: Copy certs
   ansible.builtin.copy:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
+    owner: "{{ nginx_user }}"
+    group: "{{ nginx_user }}"
+    mode: '0750'
   loop:
-    - { src: "{{ nginx_cert_path }}", dest: "{{ ssl_cert_path }}/{{ cert_name }}.crt" }
-    - { src: "{{ nginx_cert_key_path }}", dest: "{{ ssl_cert_path }}/{{ cert_name }}.key" }
+    - { src: "{{ nginx_cert_path }}", dest: "{{ nginx_path }}/ssl/{{ cert_name }}.crt" }
+    - { src: "{{ nginx_cert_key_path }}", dest: "{{ nginx_path }}/ssl/{{ cert_name }}.key" }
   notify: Enable and restart Nginx
-  become: true
-
-- name: Create directories for configs
-  ansible.builtin.file:
-    path: "{{ nginx_path }}/config/conf.d"
-    state: directory
   become: true
 
 - name: Create directories for logs
   ansible.builtin.file:
-    path: "{{ nginx_logs }}/{{ item }}"
+    path: "{{ item }}"
     state: directory
   loop:
-      - cockpit
-      - nextcloud
+      # External log directories
+      - "{{ nginx_logs }}/cockpit"
+      - "{{ nginx_logs }}/nextcloud"
+      # Internal log directories
+      - "{{ nginx_path }}/logs/cockpit"
+      - "{{ nginx_path }}/logs/nextcloud"
+  become: true
+
+- name: Mount log directories
+  ansible.builtin.mount: #TODO: Use ansible.posix.mount
+    path: "{{ nginx_path }}/logs/{{ item }}"
+    src: "{{ nginx_logs }}/{{ item }}"
+    fstype: none
+    opts: bind
+    state: mounted
+  loop:
+    - cockpit
+    - nextcloud
+  notify: Enable and restart Nextcloud
   become: true
 
 - name: Copy Nginx configs
   ansible.builtin.template:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
+    owner: "{{ nginx_user }}"
+    group: "{{ nginx_user }}"
+    mode: '0750'
   loop:
     - { src: docker-compose.yml.j2, dest: "{{ nginx_path }}/docker-compose.yml" }
     - { src: nginx.service.j2, dest: /etc/systemd/system/nginx.service }
@@ -43,6 +77,9 @@
   ansible.builtin.copy:
     src: nginx.conf
     dest: "{{ nginx_path }}/config/nginx.conf"
+    owner: "{{ nginx_user }}"
+    group: "{{ nginx_user }}"
+    mode: '0750'
   notify: Enable and restart Nginx
   become: true
 
@@ -50,6 +87,9 @@
   ansible.builtin.template:
     src: "{{ item }}"
     dest: "{{ nginx_path }}/config/conf.d/{{ item | basename | regex_replace('\\.j2$', '') }}"
+    owner: "{{ nginx_user }}"
+    group: "{{ nginx_user }}"
+    mode: '0750'
   loop:
     - conf.d/cockpit.conf.j2
     - conf.d/nextcloud.conf.j2

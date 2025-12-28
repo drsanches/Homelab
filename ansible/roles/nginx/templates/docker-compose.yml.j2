@@ -6,7 +6,7 @@ services:
     volumes:
       - {{ nginx_path }}/config/nginx.conf:/etc/nginx/nginx.conf:ro
       - {{ nginx_path }}/config/conf.d:/etc/nginx/conf.d
-      - {{ ssl_cert_path }}:/etc/nginx/ssl
+      - {{ nginx_path }}/ssl:/etc/nginx/ssl
       - {{ nginx_logs }}:/var/log/nginx
     extra_hosts:
       - "host.docker.internal:host-gateway"

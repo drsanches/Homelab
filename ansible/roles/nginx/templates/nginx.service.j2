@@ -5,10 +5,18 @@ After=docker.service
 
 [Service]
 Restart=always
+
+User={{ nginx_user }}
+Group={{ nginx_user }}
 WorkingDirectory={{ nginx_path }}
+
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths={{ nginx_path }}
 
 ExecStart=/usr/bin/docker compose up
 ExecStop=/usr/bin/docker compose down
+ExecReload=/usr/bin/docker compose restart
 
 [Install]
 WantedBy=multi-user.target

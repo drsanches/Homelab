@@ -5,10 +5,18 @@ After=docker.service
 
 [Service]
 Restart=always
+
+User={{ nextcloud_user }}
+Group={{ nextcloud_user }}
 WorkingDirectory={{ nextcloud_path }}
+
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths={{ nextcloud_path }}
 
 ExecStart=/usr/bin/docker compose --env-file .env up
 ExecStop=/usr/bin/docker compose down
+ExecReload=/usr/bin/docker compose restart
 
 [Install]
 WantedBy=multi-user.target
